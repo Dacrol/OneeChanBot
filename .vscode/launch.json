@@ -6,6 +6,21 @@
   "configurations": [
     {
       "type": "node",
+      "request": "attach",
+      "name": "Attach nodemon",
+      "restart": true,
+      "internalConsoleOptions": "openOnFirstSessionStart",
+      "protocol": "inspector",
+      "port": 9229,
+      "showAsyncStacks": true,
+      "smartStep": true,
+      "skipFiles": [
+        "<node_internals>/**/*",
+        "./node_modules/**/*"
+      ]
+    },
+    {
+      "type": "node",
       "request": "launch",
       "name": "Launch via NPM",
       "runtimeExecutable": "npm",
@@ -13,7 +28,16 @@
         "run",
         "dev"
       ],
-      "port": 9229
+      "port": 9229,
+      "showAsyncStacks": true,
+      "smartStep": true,
+      "protocol": "inspector",
+      "internalConsoleOptions": "openOnSessionStart",
+      "console": "integratedTerminal",
+      "restart": true,
+      "skipFiles": [
+        "<node_internals>/**/*"
+      ]
     }
   ]
 }
