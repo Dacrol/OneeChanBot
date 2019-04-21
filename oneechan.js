@@ -1,6 +1,7 @@
 
 const Discord = require('discord.js')
 const axios = require('axios')
+const mal = require('maljs')
 
 class OneeChan {
   constructor({commandPrefix = '!'} = {}) {
@@ -30,7 +31,23 @@ class OneeChan {
       console.error(`Invalid command "${content}" from ${author}`)
     }
     const [command, query] = messageParts.slice(1, 3)
-    channel.send('Ara ara...')
+
+    const commands = {
+      anime: async () => {
+        const results = await mal.quickSearch(query)
+        if (!(results.anime && results.anime.length)) {
+          channel.send(`You asked about ${query}, ${author.username}-kun. Sadly no matches were found.`)
+          return
+        }
+        const animeInfo = await results.anime[0].fetch()
+        let response = ((animeInfo.pictures && animeInfo.pictures.length) ? animeInfo.pictures[0] : '')  + '\n' + animeInfo.description
+        channel.send(`${response}`)
+      }
+    }
+
+    if (typeof commands[command] === 'function') {
+      commands[command]()
+    }
   }
 }
 
