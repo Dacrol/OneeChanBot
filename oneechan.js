@@ -28,7 +28,7 @@ class OneeChan {
 
   handleCommand(message) {
     const commandRegex = new RegExp(`^\\${this.commandPrefix}(\\S+)\\s*(.*)$`)
-    const { channel, author, content } = message
+    const { channel, author, content, member } = message
     const messageParts = commandRegex.exec(content)
     if (!Array.isArray(messageParts)) {
       console.error(`Invalid command "${content}" from ${author}`)
@@ -98,13 +98,31 @@ class OneeChan {
           .format('d [days], h [hours], m [minutes]')} ago).`
         channel.send(response)
         return
-      }
+      },
+      ara: async () => {
+        joinMemberChannelAndPlay(member, 'ara.ogg')
+      },
     }
 
     if (typeof commands[command] === 'function') {
       commands[command]()
     }
   }
+}
+
+async function joinMemberChannelAndPlay(member, file) {
+  if (member.voiceChannel.name.toLowerCase().includes('afk') || !member.voiceChannel || !member.voiceChannel.name) {
+    return
+  }
+  member.voiceChannel.join().then(voiceConnection => {
+    const dispatcher = voiceConnection.playFile('./sounds/' + file, {volume: 0.2})
+    dispatcher.on('end', end => {
+      member.voiceChannel.leave()
+    });
+  }).catch(err => {
+    console.error(err)
+    member.voiceChannel.leave()
+  })
 }
 
 async function getEpisodeData(query) {
