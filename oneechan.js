@@ -4,6 +4,8 @@ const mal = require('maljs')
 const moment = require('moment')
 require('moment-duration-format')
 
+const timeOffset = 2
+
 class OneeChan {
   constructor({ commandPrefix = '!' } = {}) {
     this.commandPrefix = commandPrefix
@@ -54,24 +56,10 @@ class OneeChan {
         channel.send(`${response}`)
       },
       nextep: async () => {
-        const show = await getShowDetails(query)
-        if (show.external_ids.tvdb_id <= 0) {
-          channel.send('No episode data found')
-          return
-        }
-        const episodeData = await episodeDataFromTVMaze(
-          'thetvdb',
-          show.external_ids.tvdb_id
-        )
-        if (
-          !(
-            episodeData &&
-            episodeData._embedded &&
-            episodeData._embedded.nextepisode
-          )
-        ) {
-          channel.send('No episode data found')
-          return
+        try {
+          var episodeData = await getEpisodeData(query)
+        } catch (error) {
+          channel.send(error.message)
         }
         let nextEp = episodeData._embedded.nextepisode
         let time = moment(nextEp.airstamp)
@@ -82,10 +70,32 @@ class OneeChan {
             ? ''
             : ' "' + nextEp.name + '",'
         } which airs on ${time
-          .utcOffset(1)
+          .utcOffset(timeOffset)
           .format('dddd, MMMM Do, h:mm a')} (in ${moment
           .duration(time.diff(moment()))
           .format('d [days], h [hours], m [minutes]')}).`
+        channel.send(response)
+        return
+      },
+      lastep: async () => {
+        try {
+          var episodeData = await getEpisodeData(query)
+        } catch (error) {
+          channel.send(error.message)
+        }
+        let lastEp = episodeData._embedded.previousepisode
+        let time = moment(lastEp.airstamp)
+        let response = `The last episode of ${
+          episodeData.name
+        } was episode number ${lastEp.number},${
+          lastEp.name.length < 1 || lastEp.name.startsWith('Episode')
+            ? ''
+            : ' "' + lastEp.name + '",'
+        } which aired on ${time
+          .utcOffset(timeOffset)
+          .format('dddd, MMMM Do, h:mm a')} (${moment
+          .duration(moment().diff(time))
+          .format('d [days], h [hours], m [minutes]')} ago).`
         channel.send(response)
         return
       }
@@ -95,6 +105,23 @@ class OneeChan {
       commands[command]()
     }
   }
+}
+
+async function getEpisodeData(query) {
+  const show = await getShowDetails(query)
+  if (show.external_ids.tvdb_id <= 0) {
+    throw new Error('No episode data found.')
+  }
+  const episodeData = await episodeDataFromTVMaze(
+    'thetvdb',
+    show.external_ids.tvdb_id
+  )
+  if (
+    !(episodeData && episodeData._embedded && episodeData._embedded.nextepisode)
+  ) {
+    throw new Error('No episode data found.')
+  }
+  return episodeData
 }
 
 /**
@@ -117,7 +144,7 @@ async function getShowDetails(query, tmdbToken = null) {
     .then(res => res.data)
 
   if (!json.total_results) {
-    throw new Error('No hits. Sorry!')
+    throw new Error('No matching shows found. Sorry!')
   } else {
     try {
       const show = json.results[0]
@@ -158,7 +185,6 @@ async function episodeDataFromTVMaze(externalProvider, externalID) {
       }
     )
     .then(res => {
-      console.log(res)
       return axios
         .get(
           res.headers.location + '?embed[]=nextepisode&embed[]=previousepisode'
