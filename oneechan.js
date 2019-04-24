@@ -95,7 +95,7 @@ class OneeChan {
             : ' "' + lastEp.name + '",'
         } which aired on ${time
           .utcOffset(timeOffset)
-          .format('dddd, MMMM Do, h:mm a')} (${moment
+          .format('dddd, MMMM Do YYYY, h:mm a')} (${moment
           .duration(moment().diff(time))
           .format('d [days], h [hours], m [minutes]')} ago).`
         channel.send(response)
