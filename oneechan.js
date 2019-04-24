@@ -129,17 +129,20 @@ async function joinMemberChannelAndPlay(member, file) {
 
 async function getEpisodeData(query) {
   const show = await getShowDetails(query)
-  if (show.external_ids.tvdb_id <= 0) {
-    throw new Error('No episode data found.')
+  let episodeData
+  if (show.external_ids.tvdb_id > 0) {
+    episodeData = await episodeDataFromTVMaze(
+      'thetvdb',
+      show.external_ids.tvdb_id
+    )
   }
-  const episodeData = await episodeDataFromTVMaze(
-    'thetvdb',
-    show.external_ids.tvdb_id
-  )
   if (
-    !(episodeData && episodeData._embedded && episodeData._embedded.nextepisode)
+    !(episodeData && episodeData._embedded)
   ) {
-    throw new Error('No episode data found.')
+    episodeData = await axios.get('http://api.tvmaze.com/singlesearch/shows?q=' + query + '&embed[]=nextepisode&embed[]=previousepisode').then(res => res.data)
+    if (!(episodeData && episodeData._embedded)) {
+      throw new Error('No episode data found.')
+    }
   }
   return episodeData
 }
