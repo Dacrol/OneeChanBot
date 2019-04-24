@@ -48,11 +48,13 @@ class OneeChan {
         }
         const animeInfo = await results.anime[0].fetch()
         let response =
+          animeInfo.title + '\n' + 'Score: ' + animeInfo.score + '\n\n' +
           (animeInfo.pictures && animeInfo.pictures.length
             ? animeInfo.pictures[0]
             : '') +
           '\n' +
-          animeInfo.description
+          animeInfo.description 
+          // + '\n' + animeInfo.mal.url + animeInfo.path
         channel.send(`${response}`)
       },
       nextep: async () => {
