@@ -10,6 +10,7 @@
     "axios": "^0.18.0",
     "discord.js": "^11.4.2",
     "dotenv": "^7.0.0",
+    "forever": "^1.0.0",
     "maljs": "^0.3.0",
     "moment": "^2.24.0",
     "moment-duration-format": "^2.2.2",
@@ -21,6 +22,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon --config nodemon.json --exec \"npm run debug\"",
-    "debug": "node --inspect=9229 server.js"
+    "debug": "node --inspect=9229 server.js",
+    "forever": "forever --spinSleepTime 1 --minUptime 1 server.js"
   }
 }
