@@ -48,14 +48,24 @@ class OneeChan {
         }
         const animeInfo = await results.anime[0].fetch()
         let response =
-          animeInfo.title + '\n' + 'Score: ' + animeInfo.score + '\n\n' +
+          '**__' +
+          animeInfo.title +
+          '__**' +
+          '\n' +
+          'Score: ' +
+          animeInfo.score +
+          '\n' +
+          'More info: <' +
+          animeInfo.mal.url +
+          animeInfo.path +
+          '>' +
+          '\n\n' +
           (animeInfo.pictures && animeInfo.pictures.length
             ? animeInfo.pictures[0]
             : '') +
           '\n' +
-          animeInfo.description 
-          // + '\n' + animeInfo.mal.url + animeInfo.path
-          response = response.replace('[Written by MAL Rewrite]', '')
+          animeInfo.description.replace('[Written by MAL Rewrite]', '') +
+          '\n'
         channel.send(`${response}`)
       },
       nextep: async () => {
