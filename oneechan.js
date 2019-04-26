@@ -124,18 +124,27 @@ class OneeChan {
 }
 
 async function joinMemberChannelAndPlay(member, file) {
-  if (member.voiceChannel.name.toLowerCase().includes('afk') || !member.voiceChannel || !member.voiceChannel.name) {
+  if (
+    member.voiceChannel.name.toLowerCase().includes('afk') ||
+    !member.voiceChannel ||
+    !member.voiceChannel.name
+  ) {
     return
   }
-  member.voiceChannel.join().then(voiceConnection => {
-    const dispatcher = voiceConnection.playFile('./sounds/' + file, {volume: 0.2})
-    dispatcher.on('end', end => {
+  member.voiceChannel
+    .join()
+    .then(voiceConnection => {
+      const dispatcher = voiceConnection.playFile('./sounds/' + file, {
+        volume: 0.2
+      })
+      dispatcher.on('end', end => {
+        member.voiceChannel.leave()
+      })
+    })
+    .catch(err => {
+      console.error(err)
       member.voiceChannel.leave()
-    });
-  }).catch(err => {
-    console.error(err)
-    member.voiceChannel.leave()
-  })
+    })
 }
 
 async function getEpisodeData(query) {
@@ -147,10 +156,14 @@ async function getEpisodeData(query) {
       show.external_ids.tvdb_id
     )
   }
-  if (
-    !(episodeData && episodeData._embedded)
-  ) {
-    episodeData = await axios.get('http://api.tvmaze.com/singlesearch/shows?q=' + query + '&embed[]=nextepisode&embed[]=previousepisode').then(res => res.data)
+  if (!(episodeData && episodeData._embedded)) {
+    episodeData = await axios
+      .get(
+        'http://api.tvmaze.com/singlesearch/shows?q=' +
+          query +
+          '&embed[]=nextepisode&embed[]=previousepisode'
+      )
+      .then(res => res.data)
     if (!(episodeData && episodeData._embedded)) {
       throw new Error('No episode data found.')
     }
