@@ -55,6 +55,7 @@ class OneeChan {
           '\n' +
           animeInfo.description 
           // + '\n' + animeInfo.mal.url + animeInfo.path
+          response = response.replace('[Written by MAL Rewrite]', '')
         channel.send(`${response}`)
       },
       nextep: async () => {
