@@ -164,9 +164,10 @@ async function getEpisodeData(query) {
           '&embed[]=nextepisode&embed[]=previousepisode'
       )
       .then(res => res.data)
-    if (!(episodeData && episodeData._embedded)) {
-      throw new Error('No episode data found.')
-    }
+      .catch(() => {})
+  }
+  if (!(episodeData && episodeData._embedded)) {
+    throw new Error('No episode data found.')
   }
   return episodeData
 }
