@@ -122,7 +122,27 @@ class OneeChan {
         this.joinMemberChannelAndPlay(member, 'ara.ogg')
       },
       ttstimer: async () => {
+        const unbatched = true
         const queryParts = query.split(' ')
+        const totalTime = +queryParts[0]
+        const alertTimes = queryParts.slice(1)
+        const timeObjects = alertTimes.map(time => {return {text: time + ' minutes remaining.', unbatched: unbatched, time: time}})
+        let notifiedGenerate = false
+        this.prepareTtsFiles(timeObjects, () => {
+          if (!notifiedGenerate) {
+            channel.send('Synthesizing new voice files...')
+            notifiedGenerate = true
+          }
+        }).then(() => {
+          if (notifiedGenerate) {
+            channel.send('Voice files have been synthesized!')
+          }
+        })
+        timeObjects.forEach(obj => {
+          setTimeout(() => {
+            this.playOrGenerateTts(obj.text, member, obj.unbatched, false)
+          }, (totalTime - +obj.time) * 60 * 1000)
+        })
       },
       speak: async () => {
         this.playOrGenerateTts(query, member)
@@ -134,13 +154,27 @@ class OneeChan {
     }
   }
 
-  async playOrGenerateTts(text, member, unbatched = false) {
-    let file = (unbatched ? 'u_' : '') + md5(text) + '.wav'
+  async prepareTtsFiles(textObjects = [], onGenerate = () => {}) {
+    for (const obj of textObjects) {
+      const file = getFileName(obj.text, obj.unbatched)
+      if (!fs.existsSync(this.soundsDir + file)) {
+        await axios.post(this.ttsServer, obj.unbatched ? {text: obj.text, unbatched: 'true'} : {text: obj.text}, {responseType: 'stream'}).then(async res => {
+          await res.data.pipe(fs.createWriteStream(this.soundsDir + file))
+        })
+      }
+    }
+    console.log('TTS files have been prepared')
+  }
+
+  async playOrGenerateTts(text, member, unbatched = false, generate = true) {
+    const file = getFileName(text, unbatched)
     if (fs.existsSync(this.soundsDir + file)) {
       this.joinMemberChannelAndPlay(member, file)
-    } else {
+    } else if (generate) {
       await this.generateTts(text, file, true)
       this.joinMemberChannelAndPlay(member, file)
+    } else {
+      console.log('Did not find pre-generated file: ' + file)
     }
   }
 
@@ -152,26 +186,27 @@ class OneeChan {
   }
 
   async joinMemberChannelAndPlay(member, file) {
+    const channel = (member.voice && member.voice.channel) || member.voiceChannel
     if (
-      member.voice.channel.name.toLowerCase().includes('afk') ||
-      !member.voice.channel ||
-      !member.voice.channel.name
+      !channel ||
+      !channel.name ||
+      channel.name.toLowerCase().includes('afk')
     ) {
       return
     }
-    member.voice.channel
+    channel
       .join()
       .then(voiceConnection => {
         const dispatcher = voiceConnection.play(this.soundsDir + file, {
-          volume: 0.5
+          volume: 0.3
         })
         dispatcher.on('end', end => {
-          member.voice.channel.leave()
+          channel.leave()
         })
       })
       .catch(err => {
         console.error(err)
-        member.voice.channel.leave()
+        channel.leave()
       })
   }
 }
@@ -277,6 +312,11 @@ function md5(str) {
     .createHash('md5')
     .update(str)
     .digest('hex')
+}
+
+function getFileName(text, unbatched) {
+  let file = (unbatched ? 'u_' : '') + md5(text) + '.wav'
+  return file
 }
 
 module.exports = OneeChan
