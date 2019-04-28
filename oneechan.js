@@ -146,6 +146,9 @@ class OneeChan {
       },
       speak: async () => {
         this.playOrGenerateTts(query, member)
+      },
+      uspeak: async () => {
+        this.playOrGenerateTts(query, member, true)
       }
     }
 
