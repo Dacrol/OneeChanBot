@@ -3,12 +3,18 @@ const { default: axios } = require('axios')
 const mal = require('maljs')
 const moment = require('moment')
 require('moment-duration-format')
+const crypto = require('crypto')
+const fs = require('fs')
 
 const timeOffset = 2
 
 class OneeChan {
-  constructor({ commandPrefix = '!' } = {}) {
+  constructor({ commandPrefix = '!', ttsServer = '', soundsDir = './sounds/'} = {}) {
     this.commandPrefix = commandPrefix
+    this.ttsServer = ttsServer
+    this.ttsBusy = false
+    this.soundsDir = soundsDir
+
     this.client = new Discord.Client()
     this.client.on('ready', () => {
       console.log(`Logged in as ${this.client.user.tag}!`)
@@ -113,38 +119,61 @@ class OneeChan {
         return
       },
       ara: async () => {
-        joinMemberChannelAndPlay(member, 'ara.ogg')
+        this.joinMemberChannelAndPlay(member, 'ara.ogg')
       },
+      ttstimer: async () => {
+        const queryParts = query.split(' ')
+      },
+      speak: async () => {
+        this.playOrGenerateTts(query, member)
+      }
     }
 
     if (typeof commands[command] === 'function') {
       commands[command]()
     }
   }
-}
 
-async function joinMemberChannelAndPlay(member, file) {
-  if (
-    member.voiceChannel.name.toLowerCase().includes('afk') ||
-    !member.voiceChannel ||
-    !member.voiceChannel.name
-  ) {
-    return
+  async playOrGenerateTts(text, member, unbatched = false) {
+    let file = (unbatched ? 'u_' : '') + md5(text) + '.wav'
+    if (fs.existsSync(this.soundsDir + file)) {
+      this.joinMemberChannelAndPlay(member, file)
+    } else {
+      await this.generateTts(text, file, true)
+      this.joinMemberChannelAndPlay(member, file)
+    }
   }
-  member.voiceChannel
-    .join()
-    .then(voiceConnection => {
-      const dispatcher = voiceConnection.playFile('./sounds/' + file, {
-        volume: 0.2
-      })
-      dispatcher.on('end', end => {
-        member.voiceChannel.leave()
-      })
+
+  generateTts(text, file, unbatched = false) {
+    return axios.post(this.ttsServer, unbatched ? {text: text, unbatched: 'true'} : {text: text}, {responseType: 'stream'}).then(async res => {
+      await res.data.pipe(fs.createWriteStream(this.soundsDir + file))
+      return file
     })
-    .catch(err => {
-      console.error(err)
-      member.voiceChannel.leave()
-    })
+  }
+
+  async joinMemberChannelAndPlay(member, file) {
+    if (
+      member.voice.channel.name.toLowerCase().includes('afk') ||
+      !member.voice.channel ||
+      !member.voice.channel.name
+    ) {
+      return
+    }
+    member.voice.channel
+      .join()
+      .then(voiceConnection => {
+        const dispatcher = voiceConnection.play(this.soundsDir + file, {
+          volume: 0.5
+        })
+        dispatcher.on('end', end => {
+          member.voice.channel.leave()
+        })
+      })
+      .catch(err => {
+        console.error(err)
+        member.voice.channel.leave()
+      })
+  }
 }
 
 async function getEpisodeData(query) {
@@ -241,6 +270,13 @@ async function episodeDataFromTVMaze(externalProvider, externalID) {
     })
     .catch(() => null)
   return Object.assign({}, showDetails)
+}
+
+function md5(str) {
+  return crypto
+    .createHash('md5')
+    .update(str)
+    .digest('hex')
 }
 
 module.exports = OneeChan
