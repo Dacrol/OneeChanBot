@@ -122,10 +122,13 @@ class OneeChan {
         this.joinMemberChannelAndPlay(member, 'ara.ogg')
       },
       ttstimer: async () => {
-        const unbatched = true
+        let unbatched = true
         const queryParts = query.split(' ')
         const totalTime = +queryParts[0]
         const alertTimes = queryParts.slice(1)
+        if ((totalTime - +alertTimes[0]) < 2) {
+          unbatched = false
+        }
         const timeObjects = alertTimes.map(time => {return {text: time + ' minutes remaining.', unbatched: unbatched, time: time}})
         let notifiedGenerate = false
         this.prepareTtsFiles(timeObjects, () => {
@@ -161,6 +164,7 @@ class OneeChan {
     for (const obj of textObjects) {
       const file = getFileName(obj.text, obj.unbatched)
       if (!fs.existsSync(this.soundsDir + file)) {
+        onGenerate()
         await axios.post(this.ttsServer, obj.unbatched ? {text: obj.text, unbatched: 'true'} : {text: obj.text}, {responseType: 'stream'}).then(async res => {
           await res.data.pipe(fs.createWriteStream(this.soundsDir + file))
         })
@@ -201,7 +205,7 @@ class OneeChan {
       .join()
       .then(voiceConnection => {
         const dispatcher = voiceConnection.play(this.soundsDir + file, {
-          volume: 0.3
+          volume: 0.5
         })
         dispatcher.on('end', end => {
           channel.leave()
