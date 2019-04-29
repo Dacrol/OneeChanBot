@@ -8,7 +8,7 @@
   "private": true,
   "dependencies": {
     "axios": "^0.18.0",
-    "discord.js": "discordjs/discord.js#aa253d95518b1c6fad1328372a832702a5ec66f0",
+    "discord.js": "discordjs/discord.js#aa253d9",
     "dotenv": "^7.0.0",
     "forever": "^1.0.0",
     "maljs": "^0.3.0",

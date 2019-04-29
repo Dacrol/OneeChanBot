@@ -129,7 +129,15 @@ class OneeChan {
         if ((totalTime - +alertTimes[0]) < 2) {
           unbatched = false
         }
-        const timeObjects = alertTimes.map(time => {return {text: time + ' minutes remaining.', unbatched: unbatched, time: time}})
+        const timeObjects = alertTimes.map(time => {
+          let voiceStr
+          if (time == '1') {
+            voiceStr = time + ' minute remaining.'
+          } else {
+            voiceStr = time + ' minutes remaining.'
+          }
+          return { text: voiceStr, unbatched: unbatched, time: time }
+        })
         let notifiedGenerate = false
         this.prepareTtsFiles(timeObjects, () => {
           if (!notifiedGenerate) {
@@ -204,6 +212,10 @@ class OneeChan {
     channel
       .join()
       .then(voiceConnection => {
+        // const stream = fs.createReadStream(this.soundsDir + file)
+        // const dispatcher = voiceConnection.play(stream, {
+        //   volume: 0.5
+        // })
         const dispatcher = voiceConnection.play(this.soundsDir + file, {
           volume: 0.5
         })
