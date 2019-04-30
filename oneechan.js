@@ -5,6 +5,7 @@ const moment = require('moment')
 require('moment-duration-format')
 const crypto = require('crypto')
 const fs = require('fs')
+const ytdl = require('ytdl-core')
 
 const timeOffset = 2
 
@@ -160,6 +161,12 @@ class OneeChan {
       },
       uspeak: async () => {
         this.playOrGenerateTts(query, member, true)
+      },
+      ytplay: async () => {
+        const queryParts = query.split(' ')
+        const yt = queryParts[0].startsWith('http') ? queryParts[0] : 'https://www.youtube.com/watch?v=' + queryParts[0]
+        const stream = ytdl(yt, { filter : 'audioonly' })
+        this.joinMemberChannelAndPlay(member, stream, {type: 'stream', options: { volume: +(queryParts[1] || 0.2) }})
       }
     }
 
@@ -200,7 +207,7 @@ class OneeChan {
     })
   }
 
-  async joinMemberChannelAndPlay(member, file) {
+  async joinMemberChannelAndPlay(member, target, {type = 'file', options = { volume: 0.5 }} = {}) {
     const channel = (member.voice && member.voice.channel) || member.voiceChannel
     if (
       !channel ||
@@ -209,16 +216,17 @@ class OneeChan {
     ) {
       return
     }
+    if (type === 'file') {
+      target = this.soundsDir + target
+    }
     channel
       .join()
       .then(voiceConnection => {
-        // const stream = fs.createReadStream(this.soundsDir + file)
+        // const stream = fs.createReadStream(target)
         // const dispatcher = voiceConnection.play(stream, {
         //   volume: 0.5
         // })
-        const dispatcher = voiceConnection.play(this.soundsDir + file, {
-          volume: 0.5
-        })
+        const dispatcher = voiceConnection.play(target, options)
         dispatcher.on('end', end => {
           channel.leave()
         })
