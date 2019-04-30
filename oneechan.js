@@ -166,7 +166,7 @@ class OneeChan {
         const queryParts = query.split(' ')
         const yt = queryParts[0].startsWith('http') ? queryParts[0] : 'https://www.youtube.com/watch?v=' + queryParts[0]
         const stream = ytdl(yt, { filter : 'audioonly', highWaterMark: 2**25 })
-        this.joinMemberChannelAndPlay(member, stream, {type: 'stream', options: { volume: +(queryParts[1] || 0.2) }})
+        this.joinMemberChannelAndPlay(member, stream, {type: 'stream', options: { volume: +(queryParts[1] || 0.1) }})
       }
     }
 
