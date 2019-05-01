@@ -173,7 +173,13 @@ class OneeChan {
         const yt = queryParts[0].startsWith('http') ? queryParts[0] : 'https://www.youtube.com/watch?v=' + queryParts[0]
         const stream = ytdl(yt, { filter : 'audioonly', highWaterMark: 2**25 })
         this.joinMemberChannelAndPlay(member, stream, {type: 'stream', options: { volume: +(queryParts[1] || 0.1) }})
-      }
+      },
+      play: () => {
+        const [link, volume] = query.split(' ')
+        axios.get(link, { responseType: 'stream' }).then(async res => {
+          this.joinMemberChannelAndPlay(member, res.data, { type: 'stream', options: { volume: +(volume || 0.1) } })
+        })
+      },
     }
 
     if (typeof commands[command] === 'function') {
