@@ -39,6 +39,12 @@ class OneeChan {
     const messageParts = commandRegex.exec(content)
     if (!Array.isArray(messageParts)) {
       console.error(`Invalid command "${content}" from ${author}`)
+    } else {
+      try {
+        console.log(`Message "${content}" from "${author.username}" in channel "${channel.name || 'private message'}" in guild "${message.guild ? message.guild.name : 'private message'}"`)
+      } catch (error) {
+        console.log('Error logging message: ', error.message)
+      }
     }
     const [command, query] = messageParts.slice(1, 3)
 
@@ -191,10 +197,10 @@ class OneeChan {
   async playOrGenerateTts(text, member, unbatched = false, generate = true) {
     const file = getFileName(text, unbatched)
     if (fs.existsSync(this.soundsDir + file)) {
-      this.joinMemberChannelAndPlay(member, file)
+      this.joinMemberChannelAndPlay(member, file, { type: 'file', options: { volume: 0.75 } })
     } else if (generate) {
       await this.generateTts(text, file, true)
-      this.joinMemberChannelAndPlay(member, file)
+      this.joinMemberChannelAndPlay(member, file, { type: 'file', options: { volume: 0.75 } })
     } else {
       console.log('Did not find pre-generated file: ' + file)
     }
