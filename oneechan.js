@@ -68,7 +68,7 @@ class OneeChan {
           'Score: ' +
           animeInfo.score +
           '\n' +
-          (animeInfo.english ? ('English title: ' + animeInfo.english + '\n') : '') +
+          ((animeInfo.english && animeInfo.english !== animeInfo.title) ? ('English title: ' + animeInfo.english + '\n') : '') +
           (animeInfo.synonyms ? ('Synonyms: ' + animeInfo.synonyms + '\n') : '') +
           'More info: <' +
           animeInfo.mal.url +
@@ -197,6 +197,9 @@ class OneeChan {
         axios.get(link, { responseType: 'stream' }).then(async res => {
           this.joinMemberChannelAndPlay(member, res.data, { type: 'stream', options: { volume: +(volume || 0.1) } })
         })
+      },
+      hek: async () => {
+        this.joinMemberChannelAndPlay(member, 'VayHekPhase2Start.ogg')
       },
     }
 
