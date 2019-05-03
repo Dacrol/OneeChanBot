@@ -87,6 +87,14 @@ class OneeChan {
         } catch (error) {
           channel.send(error.message)
         }
+        if (!(episodeData && episodeData._embedded && episodeData._embedded.nextepisode && episodeData._embedded.nextepisode.airstamp)) {
+          channel.send(
+            `You asked about ${query}, ${
+              author.username
+            }-kun. Unfortunately no future episode was found.`
+          )
+          return
+        }
         let nextEp = episodeData._embedded.nextepisode
         let time = moment(nextEp.airstamp)
         let response = `The next episode of ${
@@ -108,6 +116,14 @@ class OneeChan {
           var episodeData = await getEpisodeData(query)
         } catch (error) {
           channel.send(error.message)
+        }
+        if (!(episodeData && episodeData._embedded && episodeData._embedded.previousepisode && episodeData._embedded.previousepisode.airstamp)) {
+          channel.send(
+            `You asked about ${query}, ${
+              author.username
+            }-kun. Unfortunately no previous episode was found.`
+          )
+          return
         }
         let lastEp = episodeData._embedded.previousepisode
         let time = moment(lastEp.airstamp)
