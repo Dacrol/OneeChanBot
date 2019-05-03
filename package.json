@@ -1,7 +1,7 @@
 {
   "name": "OneeChanBot",
   "version": "0.0.0",
-  "main": "bot.js",
+  "main": "oneechan.js",
   "repository": "git@github.com:Dacrol/OneeChanBot.git",
   "author": "Jonas Ahrens <jonas.ahrens@gmail.com>",
   "license": "UNLICENSED",
@@ -11,7 +11,7 @@
     "discord.js": "discordjs/discord.js#aa253d9",
     "dotenv": "^7.0.0",
     "forever": "^1.0.0",
-    "maljs": "^0.3.0",
+    "maljs": "Dacrol/maljs",
     "moment": "^2.24.0",
     "moment-duration-format": "^2.2.2",
     "node-opus": "^0.3.1",
