@@ -68,6 +68,8 @@ class OneeChan {
           'Score: ' +
           animeInfo.score +
           '\n' +
+          (animeInfo.english ? ('English title: ' + animeInfo.english + '\n') : '') +
+          (animeInfo.synonyms ? ('Synonyms: ' + animeInfo.synonyms + '\n') : '') +
           'More info: <' +
           animeInfo.mal.url +
           animeInfo.path +
