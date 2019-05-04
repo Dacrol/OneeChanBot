@@ -88,6 +88,7 @@ class OneeChan {
           var episodeData = await getEpisodeData(query)
         } catch (error) {
           channel.send(error.message)
+          return
         }
         if (!(episodeData && episodeData._embedded && episodeData._embedded.nextepisode && episodeData._embedded.nextepisode.airstamp)) {
           channel.send(
@@ -118,6 +119,7 @@ class OneeChan {
           var episodeData = await getEpisodeData(query)
         } catch (error) {
           channel.send(error.message)
+          return
         }
         if (!(episodeData && episodeData._embedded && episodeData._embedded.previousepisode && episodeData._embedded.previousepisode.airstamp)) {
           channel.send(
