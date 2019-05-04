@@ -22,7 +22,7 @@ class OneeChan {
       this.client.user.setActivity('over you', { type: 'WATCHING' })
     })
     this.client.on('message', message => {
-      if (!message.content.startsWith(this.commandPrefix)) {
+      if (!message.content.startsWith(this.commandPrefix) && !(message.mentions.has(this.client.user) && !message.mentions.everyone) || message.author.bot) {
         return
       }
       this.handleCommand(message)
@@ -45,8 +45,8 @@ class OneeChan {
       } catch (error) {
         console.log('Error logging message: ', error.message)
       }
+      var [command, query] = messageParts.slice(1, 3)
     }
-    const [command, query] = messageParts.slice(1, 3)
 
     const commands = {
       anime: async () => {
@@ -205,6 +205,11 @@ class OneeChan {
 
     if (typeof commands[command] === 'function') {
       commands[command]()
+      return
+    }
+    if (message.mentions.has(this.client.user) && !content.startsWith('!')) {
+      channel.send('Available commands: !' + Object.keys(commands).join(', !'))
+      return
     }
   }
 
