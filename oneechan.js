@@ -209,8 +209,8 @@ class OneeChan {
       commands[command]()
       return
     }
-    if (message.mentions.has(this.client.user) && !content.startsWith('!')) {
-      channel.send('Available commands: !' + Object.keys(commands).join(', !'))
+    if (message.mentions.has(this.client.user) && !content.startsWith(this.commandPrefix)) {
+      channel.send('Available commands: ' + this.commandPrefix + Object.keys(commands).join(', ' + this.commandPrefix))
       return
     }
   }
