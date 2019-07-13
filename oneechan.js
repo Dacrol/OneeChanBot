@@ -10,11 +10,12 @@ const ytdl = require('ytdl-core')
 const timeOffset = 2
 
 class OneeChan {
-  constructor({ commandPrefix = '!', ttsServer = '', soundsDir = './sounds/'} = {}) {
+  constructor({ commandPrefix = '!', ttsServer = '', soundsDir = './sounds/', thoughtsFile = './thoughts.json'} = {}) {
     this.commandPrefix = commandPrefix
     this.ttsServer = ttsServer
     this.ttsBusy = false
     this.soundsDir = soundsDir
+    this.thoughts = JSON.parse(fs.readFileSync(thoughtsFile, 'UTF8'))
 
     this.client = new Discord.Client()
     this.client.on('ready', () => {
@@ -203,6 +204,9 @@ class OneeChan {
       hek: async () => {
         this.joinMemberChannelAndPlay(member, 'VayHekPhase2Start.ogg')
       },
+      tftd: async () => {
+        channel.send('Thought for the Day: ' + this.thoughts[Math.floor(Math.random() * this.thoughts.length)])
+      }
     }
 
     if (typeof commands[command] === 'function') {
