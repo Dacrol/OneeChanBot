@@ -15,8 +15,9 @@ class OneeChan {
     this.ttsServer = ttsServer
     this.ttsBusy = false
     this.soundsDir = soundsDir
-    this.thoughts = JSON.parse(fs.readFileSync(thoughtsFile, 'UTF8'))
-
+    if (fs.existsSync(thoughtsFile)) {
+      this.thoughts = JSON.parse(fs.readFileSync(thoughtsFile, 'UTF8'))
+    }
     this.client = new Discord.Client()
     this.client.on('ready', () => {
       console.log(`Logged in as ${this.client.user.tag}!`)
@@ -205,7 +206,9 @@ class OneeChan {
         this.joinMemberChannelAndPlay(member, 'VayHekPhase2Start.ogg')
       },
       tftd: async () => {
-        channel.send('Thought for the Day: ' + this.thoughts[Math.floor(Math.random() * this.thoughts.length)])
+        if (this.thoughts && Array.isArray(this.thoughts)) {
+          channel.send('Thought for the Day: ' + this.thoughts[Math.floor(Math.random() * this.thoughts.length)])
+        }
       }
     }
 
