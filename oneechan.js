@@ -148,7 +148,8 @@ class OneeChan {
         return
       },
       ara: async () => {
-        this.joinMemberChannelAndPlay(member, 'ara.ogg')
+        const number = Math.floor(Math.random() * 12) + 1
+        this.joinMemberChannelAndPlay(member, 'ara' + number + '.ogg')
       },
       ttstimer: async () => {
         let unbatched = true
