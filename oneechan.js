@@ -150,7 +150,9 @@ class OneeChan {
       ara: async () => {
         const number = Math.floor(Math.random() * 12) + 1
         if (number === 12) {
-          channel.send('', {files: ['./files/ara.gif']})
+          channel.send(`Ara ara, <@${
+            author.id
+          }>-kun...`, {files: ['./files/ara.gif']})
         }
         this.joinMemberChannelAndPlay(member, 'ara' + number + '.ogg')
       },
