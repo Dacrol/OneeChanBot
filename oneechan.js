@@ -261,12 +261,17 @@ class OneeChan {
   }
 
   async joinMemberChannelAndPlay(member, target, {type = 'file', options = { volume: 0.5 }} = {}) {
-    const channel = (member.voice && member.voice.channel) || member.voiceChannel
+    if (!member) {
+      console.warn('Message received without known member')
+      return
+    }
+    let channel = (member.voice && member.voice.channel) || member.voiceChannel
     if (
       !channel ||
       !channel.name ||
       channel.name.toLowerCase().includes('afk')
     ) {
+      console.warn('Could not find a suitable channel to play in')
       return
     }
     if (type === 'file') {
