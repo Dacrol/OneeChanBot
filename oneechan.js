@@ -216,7 +216,20 @@ class OneeChan {
       },
       tftd: async () => {
         if (this.thoughts && Array.isArray(this.thoughts)) {
-          channel.send('Thought for the Day: ' + this.thoughts[Math.floor(Math.random() * this.thoughts.length)])
+          const thought = this.thoughts[Math.floor(Math.random() * this.thoughts.length)]
+          if (!thought) {
+            return
+          }
+          const message = new Discord.MessageEmbed()
+            .setColor(0x551A8A)
+            // .setAuthor('Thought for the Day:')
+            .setDescription('Thought for the Day:')
+            // .setTitle(`\u200b\n**${thought}**\n\u200b`)
+            .addField(`\u200b\n${thought}`, '\u200b')
+            .setThumbnail('https://i.imgur.com/QhLeerd.png')
+            // https://i.imgur.com/QhLeerd.png
+            // https://i.imgur.com/K52ILOH.png
+          channel.send(message)
         }
       }
     }
