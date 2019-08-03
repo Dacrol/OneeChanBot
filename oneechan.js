@@ -37,7 +37,10 @@ class OneeChan {
 
   handleCommand(message) {
     const commandRegex = new RegExp(`^\\${this.commandPrefix}(\\S+)\\s*(.*)$`)
-    const { channel, author, content, member } = message
+    let { channel, author, content, member } = message
+    if (!member) {
+      member = this.tryFindMember(author)
+    }
     const messageParts = commandRegex.exec(content)
     if (!Array.isArray(messageParts)) {
       console.error(`Invalid command "${content}" from ${author}`)
@@ -293,6 +296,20 @@ class OneeChan {
         console.error(err)
         channel.leave()
       })
+  }
+
+  tryFindMember(author) {
+    const channels = this.client.channels.values()
+    for (let channel of channels) {
+      if (channel.type === 'voice') {
+        for (let member of channel.members.values()) {
+          if (member.id === author.id) {
+            return member
+          }
+        }
+      }
+    }
+    return null
   }
 }
 
