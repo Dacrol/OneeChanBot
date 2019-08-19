@@ -10,11 +10,12 @@ const ytdl = require('ytdl-core')
 const timeOffset = 2
 
 class OneeChan {
-  constructor({ commandPrefix = '!', ttsServer = '', soundsDir = './sounds/', thoughtsFile = './thoughts.json'} = {}) {
+  constructor({ commandPrefix = '!', ttsServer = '', soundsDir = './sounds/', thoughtsFile = './thoughts.json', defaultPlayOptions = {}} = {}) {
     this.commandPrefix = commandPrefix
     this.ttsServer = ttsServer
     this.ttsBusy = false
     this.soundsDir = soundsDir
+    this.defaultPlayOptions = Object.assign({ passes: 3, highWaterMark: 256, bitrate: 128 }, defaultPlayOptions)
     if (fs.existsSync(thoughtsFile)) {
       this.thoughts = JSON.parse(fs.readFileSync(thoughtsFile, 'UTF8'))
     }
@@ -202,13 +203,13 @@ class OneeChan {
       ytplay: async () => {
         const queryParts = query.split(' ')
         const yt = queryParts[0].startsWith('http') ? queryParts[0] : 'https://www.youtube.com/watch?v=' + queryParts[0]
-        const stream = ytdl(yt, { filter : 'audioonly', highWaterMark: 2**25 })
-        this.joinMemberChannelAndPlay(member, stream, {type: 'stream', options: { volume: +(queryParts[1] || 0.1) }})
+        const stream = ytdl(yt, { filter : 'audioonly', highWaterMark: 2**25, quality: 'highestaudio' })
+        this.joinMemberChannelAndPlay(member, stream, {type: 'stream', options: { volume: +(queryParts[1] || 0.1), ...this.defaultPlayOptions }})
       },
       play: () => {
         const [link, volume] = query.split(' ')
         axios.get(link, { responseType: 'stream' }).then(async res => {
-          this.joinMemberChannelAndPlay(member, res.data, { type: 'stream', options: { volume: +(volume || 0.1) } })
+          this.joinMemberChannelAndPlay(member, res.data, { type: 'stream', options: { volume: +(volume || 0.1), ...this.defaultPlayOptions } })
         })
       },
       hek: async () => {
