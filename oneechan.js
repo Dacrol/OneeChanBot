@@ -207,6 +207,19 @@ class OneeChan {
         stream.on('info', (info, format) => {
           const bitrate = (format && format.audioBitrate) || 128
           this.joinMemberChannelAndPlay(member, stream, {type: 'stream', options: { ...this.defaultPlayOptions, volume: +(queryParts[1] || 0.1), bitrate: bitrate }})
+          if (channel) {
+            const message = new Discord.MessageEmbed()
+              .setColor('RANDOM')
+              .setTitle('Playing')
+              .setDescription(info.title)
+            try {
+              const thumbnails = info.player_response.videoDetails.thumbnail.thumbnails
+              const url = Array.isArray(thumbnails) && thumbnails[thumbnails.length - 1].url
+              url && message.setThumbnail(url)
+            } catch (error) {
+            }
+            channel.send(message)
+          }
         })
       },
       play: () => {
