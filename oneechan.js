@@ -210,13 +210,15 @@ class OneeChan {
           if (channel) {
             const message = new Discord.MessageEmbed()
               .setColor('RANDOM')
-              .setTitle('Playing')
+              .setTitle('Playing: ')
               .setDescription(info.title)
             try {
               const thumbnails = info.player_response.videoDetails.thumbnail.thumbnails
               const url = Array.isArray(thumbnails) && thumbnails[thumbnails.length - 1].url
               url && message.setThumbnail(url)
+              message.setURL(info.video_url)
             } catch (error) {
+              console.warn(error)
             }
             channel.send(message)
           }
