@@ -221,6 +221,7 @@ class OneeChan {
             channel.send(message)
           }
         })
+        stream.on('error', () => {})
       },
       play: () => {
         const [link, volume] = query.split(' ')
